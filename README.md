@@ -1,13 +1,5 @@
 # snake_ai_game
-this applications uses reinforcement learning to train an agent to play the retro game 'snake'.
+This applications uses reinforcement learning to train an agent to play the retro game 'snake'.
 
-Application Demo:
+The development of this application has taught me many things both about reinforcment learning and how to best use Git and GitHub.
 
-
-
-Training logs
-
-first 30 minute testing session:
-high score - 
-average score - 
-epsilon value - 
