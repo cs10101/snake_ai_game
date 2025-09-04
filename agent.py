@@ -158,7 +158,7 @@ def train(num_games = None):
                 agent.model.save()
 
             #print('Game', agent.n_games, 'score', score, 'Record:', record)
-            print(f"Game {agent.n_games} | Score: {score} | Record: {record} | Epsilon: {agent.epsilon}")
+            print(f"Game {agent.n_games} | Score: {score} | Record: {record} | Epsilon: {agent.epsilon} | Average Score: {round((total_score / agent.n_games), 2)}")
 
             plot_scores.append(score)
 

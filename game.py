@@ -59,7 +59,7 @@ class SnakeGameAI:
 
         # init display
         self.display = pygame.display.set_mode((self.w, self.h))
-        pygame.display.set_caption('Snake')
+        pygame.display.set_caption('Snake Version 1.0')
 
         # this line keeps track of how long the game has been running
         self.clock = pygame.time.Clock()
@@ -152,8 +152,12 @@ class SnakeGameAI:
             
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
         
-        text = font.render("Score: " + str(self.score), True, WHITE)
-        self.display.blit(text, [0, 0])
+        score_text = font.render("Score: " + str(self.score), True, WHITE)
+
+        # Display the number of games played in a session
+        
+
+        self.display.blit(score_text, [0, 0])
         pygame.display.flip()
         
     def _move(self, action):
