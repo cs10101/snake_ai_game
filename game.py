@@ -40,7 +40,7 @@ BLOCK_SIZE = 20
 
 # SPEED is the speed of the game
 # higher values make the game faster
-SPEED = 20
+SPEED = 60
 
 # this is the main class for the game
 # the class allows us to create a game object
