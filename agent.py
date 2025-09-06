@@ -138,7 +138,15 @@ class Agent:
         # below is how we calculate the epsilon decay
         # after each game the value will decrease and allow the agent to make less random moves by allowing it to explot what it has learned in its neural network
         # this means that at the start of the training the agent will make a lot of random
-        self.epsilon = 80 - self.n_games
+        
+        #self.epsilon = 80 - self.n_games
+
+        # this is the new way we are calculating the models epsilon decay
+        if num_games:
+            self.epsilon = max(0.01, 1 - (self.n_games / num_games))
+
+        else:
+            self.epsilon = 0.01 + (1 - 0.01) * np.exp(-0.001 * self.n_games)
 
         # this is the move array which will be returned by this method
         # the three values represent the directions the snake can move in
