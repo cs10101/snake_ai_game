@@ -87,33 +87,46 @@ class SnakeGameAI:
         self._place_food()
         self.frame_iteration = 0
 
-        
+    # this method places the food in a random spot on the screen
     def _place_food(self):
+        # this is the x coordinate of the food
         x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
+
+        # this is the y coordinate of the food
         y = random.randint(0, (self.h-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+
+        # we then take both coordinates and create a point object to put on the screen
         self.food = Point(x, y)
+
+        # if the food is placed on a point of the screen where the snakes body is aready then we need to replace the food object
         if self.food in self.snake:
             self._place_food()
         
+    # this method is used to play a single step of the game
     def play_step(self, action):
-        self.frame_iteration += 1
+        self.frame_iteration += 1 # keeps track of total frames in the game
+
         # 1. collect user input
         for event in pygame.event.get():
+
+            # if the program window is closed then the program will quit
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
         # 2. move
         self._move(action) # update the head
-        self.snake.insert(0, self.head)
+        self.snake.insert(0, self.head) # insert new head
         
-        # 3. check if game over
+        # 3. check if the game is over
         reward = 0
-        game_over = False
+        game_over = False # boolean flag to indicate if the game is currently over
+
+        # if the snake collides with itself or the wall or takes too long to find food then the game is over
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
-            game_over = True
-            reward = -10
-            return reward, game_over, self.score
+            game_over = True # we set the game_over flag to True
+            reward = -10 # give the agent a negative reward if it collides with something
+            return reward, game_over, self.score # return the reward, game over flag and score to the agent
             
         # 4. place new food or just move
         if self.head == self.food:
@@ -130,14 +143,18 @@ class SnakeGameAI:
         # 6. return game over and score
         return reward, game_over, self.score
     
+    # this method checks if the snake has collided with itself or a wall
     def is_collision(self, pt = None):
 
+        # if no point is provided, we check for collision with the head
         if pt is None:
-            pt = self.head
+            pt = self.head # we set the point to be the head of the snake
         # hits boundary
+        # this line checks for wall collisions by seeing if the x or y coordinates of the head are outside the game window
         if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
             return True
         # hits itself
+        # this if statement checks to see if the point of collision is in the list of points which make up the snakes body
         if pt in self.snake[1:]:
             return True
         

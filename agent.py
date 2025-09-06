@@ -135,13 +135,23 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
-        # random moves: tradeoff exploration / exploitation
+        # below is how we calculate the epsilon decay
+        # after each game the value will decrease and allow the agent to make less random moves by allowing it to explot what it has learned in its neural network
+        # this means that at the start of the training the agent will make a lot of random
         self.epsilon = 80 - self.n_games
+
+        # this is the move array which will be returned by this method
+        # the three values represent the directions the snake can move in
+        # for example, [1,0,0] = straight
         final_move = [0,0,0]
 
+        # this if statement is what decides if the agent will make a random move or if it will exploit what its learned in its neural network
+        # the higher the value of epsilon, the more likely the agent will make a random move
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0,2)
             final_move[move] = 1
+
+        # if the agent chooses not to make a random move, then it will use its neural network to predict the best move
         else:
             state0 = torch.tensor(np.array(state), dtype = torch.float).to(device)
             prediction = self.model(state0)
