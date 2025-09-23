@@ -1,6 +1,8 @@
 import torch # this library is how we will build our neural network
 import random # this will allow us to intorduce randomnesss into our agent and game
 import numpy as np # this is for numerical opperations
+import os # this is used to allow us to save the model and training graphs to the Downloads folder
+import matplotlib.pyplot as plt # this is used to plot the training graphs
 
 from game import SnakeGameAI, Direction, Point # here we are importing the SnakeGameAI class from the game file
 from collections import deque # this is a ds where we store memories
@@ -222,6 +224,12 @@ def train(num_games = None):
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
+
+    # Save the final training graph to Downloads
+    downloads_path = os.path.expanduser("~/Downloads")
+    final_filename = os.path.join(downloads_path, "snake_training_final.png")
+    plt.savefig(final_filename)
+    print(f"Final training graph saved to {final_filename}")
 
 if __name__ == '__main__':
 

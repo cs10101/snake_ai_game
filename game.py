@@ -40,7 +40,7 @@ BLOCK_SIZE = 20
 
 # SPEED is the speed of the game
 # higher values make the game faster
-SPEED = 60
+SPEED = 40
 
 # this is the main class for the game
 # the class allows us to create a game object
@@ -61,11 +61,11 @@ class SnakeGameAI:
         self.display = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption('Snake Version 1.0')
 
+        
         # this line keeps track of how long the game has been running
         self.clock = pygame.time.Clock()
         self.reset()
-        
-        
+
 
     # this is the reset function which will be used to reset the game if the user want to reset the game
     def reset(self):
@@ -84,7 +84,14 @@ class SnakeGameAI:
         
         self.score = 0
         self.food = None
+
+        # we place a peice of food on the screen so the snake can eat it
+        # and also so that we can calulate the distance between the snake and the food
         self._place_food()
+
+        # track the distance between the snake and the food
+        self.distance_to_food = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.y)
+
         self.frame_iteration = 0
 
     # this method places the food in a random spot on the screen
@@ -115,6 +122,7 @@ class SnakeGameAI:
                 quit()
 
         # 2. move
+        old_distance = self.distance_to_food # store this before we make a move
         self._move(action) # update the head
         self.snake.insert(0, self.head) # insert new head
         
@@ -125,7 +133,7 @@ class SnakeGameAI:
         # if the snake collides with itself or the wall or takes too long to find food then the game is over
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
             game_over = True # we set the game_over flag to True
-            reward = -10 # give the agent a negative reward if it collides with something
+            reward = -100 # give the agent a negative reward if it collides with something
             return reward, game_over, self.score # return the reward, game over flag and score to the agent
             
         # 4. place new food or just move
@@ -135,6 +143,17 @@ class SnakeGameAI:
             self._place_food()
         else:
             self.snake.pop()
+
+        new_distance = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.y)
+
+        if new_distance < old_distance:
+            reward += 1
+
+        else:
+            reward -= 1
+
+        # update the distance to the foods location
+        self.distance_to_food = new_distance
         
         # 5. update ui and clock
         self._update_ui()
