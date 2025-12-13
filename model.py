@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import os
 import numpy as np
 
+# this is the neural network model
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
@@ -44,7 +45,8 @@ class Linear_QNet(nn.Module):
         print('Model loaded from', file_name, 'onto', device)
 
 
-
+# this is the QTrainer class
+# it is responsible for training the model using the Q-learning algorithm
 class QTrainer:
 
     def __init__(self, model, lr, gamma, device):
