@@ -18,7 +18,7 @@ class Linear_QNet(nn.Module):
         return x
     
     def save(self, file_name = 'model.pth'):
-        model_folder_path = '.models'
+        model_folder_path = 'models'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
@@ -34,7 +34,7 @@ class Linear_QNet(nn.Module):
         if device is None:
             device = torch.device('cpu')
 
-        model_folder_path = '.models'
+        model_folder_path = 'models'
         file_name = os.path.join(model_folder_path, file_name)
 
         self.load_state_dict(torch.load(file_name, map_location = device))
@@ -74,7 +74,7 @@ class QTrainer:
         # 1: get predicted Q values with the current state
         pred = self.model(state)
 
-        target = pred.clone()
+        target = pred.clone().detach()
 
         for idx in range(len(done)):
             Q_new = reward[idx]
@@ -82,7 +82,7 @@ class QTrainer:
             if not done[idx]:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 
-            target[idx][torch.argmax(action).item()] = Q_new
+            target[idx][torch.argmax(action[idx]).item()] = Q_new
 
         # 2: r + y * next_predicted Q value
         # pred.clone()

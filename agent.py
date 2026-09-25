@@ -1,7 +1,7 @@
 import torch # this library is how we will build our neural network
 import random # this will allow us to intorduce randomnesss into our agent and game
 import numpy as np # this is for numerical opperations
-import os # this is used to allow us to save the model and training graphs to the Downloads folder
+import os  # used for managing file paths and saving training outputs
 import matplotlib.pyplot as plt # this is used to plot the training graphs
 
 from game import SnakeGameAI, Direction, Point # here we are importing the SnakeGameAI class from the game file
@@ -23,8 +23,9 @@ print('Using CPU only (MPS disabled due to stability issues).')
 class Agent:
 
     # this is the constructor method and is how we create the agent object
-    def __init__(self):
+    def __init__(self, num_games = None):
         self.n_games = 0 # this varaible is the number of games the agent has played during training
+        self.num_games = num_games # this variable is the number of games the agent will play during training
         self.epsilon = 0 # this is the randomness factor, the higher the value of epsilon the more random the actions of the agent will be
         self.gamma = 0.9 # discount rate, this number must always be smaller than 1 and is used to balance immediate and future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # this is the memory ds where we will store our experiences
@@ -43,7 +44,7 @@ class Agent:
             print('Loaded saved model. Continuing model training...')
         
         # if there is no model found then we catch the exception and then print a message to the user
-        except:
+        except FileNotFoundError:
             print('No saved model found. Starting new model trining...')
 
     # this method is how we get the current state of the game
@@ -145,7 +146,7 @@ class Agent:
 
         # this is the new way we are calculating the models epsilon decay
         if num_games:
-            self.epsilon = max(0.01, 1 - (self.n_games / num_games))
+            self.epsilon = max(0.01, 1 - (self.n_games / self.num_games))
 
         else:
             self.epsilon = 0.01 + (1 - 0.01) * np.exp(-0.001 * self.n_games)
@@ -176,7 +177,7 @@ def train(num_games = None):
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Agent()
+    agent = Agent(num_games)
     game = SnakeGameAI()
 
     #agent.model.save("initial_model.pth")
@@ -225,10 +226,13 @@ def train(num_games = None):
 
             plot(plot_scores, plot_mean_scores)
 
-    # Save the final training graph to Downloads
-    downloads_path = os.path.expanduser("~/Downloads")
-    final_filename = os.path.join(downloads_path, "snake_training_final.png")
+    # Save the final training graph to the project's outputs folder
+    output_path = "outputs"
+    os.makedirs(output_path, exist_ok=True)
+
+    final_filename = os.path.join(output_path, "snake_training_final.png")
     plt.savefig(final_filename)
+
     print(f"Final training graph saved to {final_filename}")
 
 if __name__ == '__main__':

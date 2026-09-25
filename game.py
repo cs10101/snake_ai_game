@@ -10,8 +10,12 @@ pygame.init()
 
 # we are using the 'ariel.ttf' file to render text in the game
 # you can also use pygame.font.SysFont if you don't have the ttf file
-font = pygame.font.Font('arial.ttf', 25)
+#font = pygame.font.Font('arial.ttf', 25)
 #font = pygame.font.SysFont('arial', 25)
+
+# Use Pygame's default font so the game does not depend on
+# an external font file being installed or bundled.
+font = pygame.font.Font(None, 25)
 
 # this is a class to represent the directions the snake can move in
 class Direction(Enum):

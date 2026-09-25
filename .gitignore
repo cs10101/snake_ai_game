@@ -1,27 +1,21 @@
-venv/
+# Virtual environments
 .venv/
-*.pyc
+venv/
 
-# OS junk
-.DS_Store
-
-# Python cache
+# Python cache / compiled files
 __pycache__/
 *.py[cod]
 
-# Virtual environments
-venv/
-.venv/
-
-# IDE stuff
-.vscode/
-.idea/
-
-# Logs
-*.log
-
-# Models
+# Trained models
 models/
 *.pth
 *.pt
 
+# Generated training outputs
+outputs/
+
+# macOS
+.DS_Store
+
+# VS Code local settings
+.vscode/
