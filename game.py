@@ -4,6 +4,7 @@ import random # this is used to generate random positions for the food
 from enum import Enum # this is used to define the direction of the snake
 from collections import namedtuple # this is used to create a simple class to represent points on the screen
 import numpy as np
+import sys
 
 # initialize pygame and fonts 
 pygame.init()
@@ -123,7 +124,7 @@ class SnakeGameAI:
             # if the program window is closed then the program will quit
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                sys.exit()
 
         # 2. move
         old_distance = self.distance_to_food # store this before we make a move

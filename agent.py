@@ -3,6 +3,7 @@ import random # this will allow us to intorduce randomnesss into our agent and g
 import numpy as np # this is for numerical opperations
 import os  # used for managing file paths and saving training outputs
 import matplotlib.pyplot as plt # this is used to plot the training graphs
+import sys # this is used to read terminal inputs
 
 from game import SnakeGameAI, Direction, Point # here we are importing the SnakeGameAI class from the game file
 from collections import deque # this is a ds where we store memories
@@ -18,18 +19,37 @@ LR = 0.002 # this is our learning rate
 device = torch.device("cpu") # we train the model on the CPU due to stability issues with the MPS backend
 print('Using CPU only (MPS disabled due to stability issues).')
 
+
+def get_model_path():
+    if getattr(sys, 'frozen', False):
+        # Running as a packaged macOS application
+        base_path = os.path.join(
+            os.path.dirname(sys.executable),
+            '..',
+            'Resources'
+        )
+    else:
+        # Running normally from the source code
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.abspath(
+        os.path.join(base_path, '.models', 'model.pth')
+    )
+
+
 # this is the agent class
 # this is our snake which will be learning how to play the game
 class Agent:
 
     # this is the constructor method and is how we create the agent object
-    def __init__(self, num_games = None):
+    def __init__(self, num_games = None, demo_mode = False):
         self.n_games = 0 # this varaible is the number of games the agent has played during training
         self.num_games = num_games # this variable is the number of games the agent will play during training
         self.epsilon = 0 # this is the randomness factor, the higher the value of epsilon the more random the actions of the agent will be
         self.gamma = 0.9 # discount rate, this number must always be smaller than 1 and is used to balance immediate and future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # this is the memory ds where we will store our experiences
         self.model = Linear_QNet(11, 128, 3).to(device) # this is the actual neural network model, it has 11 input nodes, 128 hidden nodes and 3 output nodes
+        self.demo_mode = demo_mode  # this variable is used to determine if the agent is in demo mode or not
 
         # this is the trainer object which will be used to train the model
         # we can see that the QTrainer class takes the model, learning rate, the gamma value, and the device the training should take place on
@@ -38,7 +58,7 @@ class Agent:
         # try loading an existing model if it already exists
         try:
             # this line will look for a 'model.pth' file in the current directory and then load it
-            self.model.load(device=device)
+            self.model.load(file_name=get_model_path(), device=device)
 
             # if one is found, we use this print statemnt to tell the user
             print('Loaded saved model. Continuing model training...')
@@ -145,11 +165,19 @@ class Agent:
         #self.epsilon = 80 - self.n_games
 
         # this is the new way we are calculating the models epsilon decay
-        if num_games:
-            self.epsilon = max(0.01, 1 - (self.n_games / self.num_games))
+        if self.demo_mode:
+            self.epsilon = 0  # Set epsilon to a low value for demo mode to reduce randomness
+
+        elif self.num_games:
+            self.epsilon = max(
+                0.01,
+                1 - (self.n_games / self.num_games)
+            )
 
         else:
-            self.epsilon = 0.01 + (1 - 0.01) * np.exp(-0.001 * self.n_games)
+            self.epsilon = 0.01 + (1 - 0.01) * np.exp(
+                -0.001 * self.n_games
+            )
 
         # this is the move array which will be returned by this method
         # the three values represent the directions the snake can move in
@@ -172,12 +200,15 @@ class Agent:
         return final_move
 
 
-def train(num_games = None):
+def train(num_games = None, demo_mode = False):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Agent(num_games)
+    agent = Agent(num_games, demo_mode)  # Pass demo_mode to the Agent instance
+
+    if demo_mode:
+        agent.epsilon = 0  # Set epsilon to a low value for demo mode to reduce randomness
     game = SnakeGameAI()
 
     #agent.model.save("initial_model.pth")
@@ -195,23 +226,40 @@ def train(num_games = None):
         reward, done, score = game.play_step(final_move)
         state_new = agent.get_state(game)
 
-        # train short memory
-        agent.train_short_memory(state_old, final_move, reward, state_new, done)
+        if not demo_mode:
+            # train short memory
+            agent.train_short_memory(
+                state_old,
+                final_move,
+                reward,
+                state_new,
+                done
+            )
 
-        # remember
-        agent.remember(state_old, final_move, reward, state_new, done)
+            # remember experience
+            agent.remember(
+                state_old,
+                final_move,
+                reward,
+                state_new,
+                done
+            )
 
         if done:
             # train the long memory, plot results
             game.reset()
             agent.n_games += 1
-            agent.train_long_memory()
+
+            if not demo_mode:
+                agent.train_long_memory()
 
             # this if statement is used to check if the model has beaten its high score
             # if the model has beaten its high score, it will overwrite the exisiting model and save the new model to model.pth
             if score > record:
                 record = score
-                agent.model.save()
+
+                if not demo_mode:
+                    agent.model.save()
 
             # this is the print statment what will print stats of the training session to the terminl.
             print(f"Game {agent.n_games} | Score: {score} | Record: {record} | Epsilon: {agent.epsilon} | Average Score: {round((total_score / agent.n_games), 2)}")
@@ -253,4 +301,4 @@ if __name__ == '__main__':
             print("Invalid number of games. Running forever now.")
 
     # here we call the train function and pass in the num_games variable to tell the agent how many games to play
-    train(num_games = num_games)
+    train(num_games = num_games, demo_mode = True) # we set demo_mode to True to run the agent in demo mode

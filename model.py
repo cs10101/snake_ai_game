@@ -25,6 +25,9 @@ class Linear_QNet(nn.Module):
         #file_name = os.path.join(model_folder_path), file_name
         file_name = os.path.join(model_folder_path, file_name)
         torch.save(self.state_dict(), file_name)
+
+        print('MODEL PATH:', os.path.abspath(file_name))
+        print('MODEL EXISTS:', os.path.exists(file_name))
         print('model saved to', file_name)
 
     # this new load function will allow us to load a saved model

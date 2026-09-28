@@ -19,3 +19,8 @@ outputs/
 
 # VS Code local settings
 .vscode/
+
+# PyInstaller
+build/
+dist/
+*.spec
